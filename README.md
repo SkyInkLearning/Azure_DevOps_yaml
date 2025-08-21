@@ -16,8 +16,10 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 
 ## Stages:
 
-##
+### Build:
 
-##
+### Test:
 
-##
+### Publish:
+
+### Deploy:
