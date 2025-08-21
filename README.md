@@ -10,6 +10,14 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 
 ## PR:
 
-## Triggers:
+## Pool:
 
-## Build:
+## Variables:
+
+## Stages:
+
+##
+
+##
+
+##
