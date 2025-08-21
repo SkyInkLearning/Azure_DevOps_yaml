@@ -8,7 +8,15 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 
 ## Triggers:
 
+```yaml
+
+```
+
 ## PR:
+
+```yaml
+
+```
 
 ## Pool:
 
@@ -23,3 +31,5 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 ### Publish:
 
 ### Deploy:
+
+## Scripts:
