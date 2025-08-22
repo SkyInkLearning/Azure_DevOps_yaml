@@ -9,8 +9,15 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 ## Triggers:
 
 ```yaml
-
+trigger:
+  branches:
+    include:
+      - develop
+      - main
 ```
+
+The pipeline will run everytime you merge anything into the chosen trigger branches which will build the program and run the tests.
+
 
 ## PR:
 
@@ -20,16 +27,48 @@ This is simply the yaml code that I recently used for one of my courses. Here I 
 
 ## Pool:
 
+```yaml
+
+```
+
 ## Variables:
+
+```yaml
+
+```
 
 ## Stages:
 
+```yaml
+
+```
+
 ### Build:
+
+```yaml
+
+```
 
 ### Test:
 
+```yaml
+
+```
+
 ### Publish:
+
+```yaml
+
+```
 
 ### Deploy:
 
+```yaml
+
+```
+
 ## Scripts:
+
+```yaml
+
+```
