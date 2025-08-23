@@ -9,7 +9,7 @@ I think my best way of explaning the yaml pipeline is that you are explaining to
 
 So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass. 
 
-## Triggers:
+### Triggers:
 
 ```yaml
 trigger:
@@ -22,7 +22,7 @@ trigger:
 The pipeline will run everytime you merge anything into the chosen trigger branches.
 
 
-## PR:
+### PR:
 
 ```yaml
 pr:
@@ -34,7 +34,7 @@ pr:
 
 The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. 
 
-## Pool:
+### Pool:
 
 ```yaml
 pool:
@@ -45,7 +45,7 @@ This is an agent pool which picks a Microsoft-hosted windows agent.
 
 An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So in the pool above you request a virtual machine which has windows latest things on it to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, the virtual machine will reset itself.
 
-## Variables:
+### Variables:
 
 ```yaml
 variables:
@@ -54,7 +54,7 @@ variables:
 
 The variable section is just as in normal code. You pre-set key value pairs so that you can use them later on in the yaml. For example the buildConfiguration above gets used in alot of the scripts below. 
 
-## Stages:
+### Stages:
 
 ```yaml
 stages:
@@ -169,7 +169,7 @@ The deploy stage depends on the publishing stage.
 It will download the artifact zip file, un-zip it, and deploy the code to the site.
 
 
-## Scripts:
+### Scripts:
 
 ```yaml
 - script: dotnet publish CarSimulatorApp.sln --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
@@ -180,7 +180,7 @@ Scripts is a way to get the virtual machine to do things. In the script you can 
 
 The displayname is what is shown on the UI when the pipeline is being run.
 
-## How to require a pr for a branch:
+### How to require a pr for a branch:
 
 To force pull requests on certain branches you have to set up branch policies. 
 In the repository section, click branches and then go to the specific branches policies and change the following;
