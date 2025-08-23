@@ -2,9 +2,12 @@
 
 This is simply the yaml code that I recently used for one of my courses. Here I will go through each section and explain what they do.
 
-```yaml
 
-```
+## Best explanation:
+
+I think my best way of explaning the yaml pipeline is that you are explaining to a virtual machine what to install and run and what you want to trigger the VM to do it. 
+
+So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass. 
 
 ## Triggers:
 
@@ -40,7 +43,7 @@ pool:
 
 This is an agent pool which picks a Microsoft-hosted windows agent. 
 
-An agent is a virtual machine that runs the pipeline steps. So when you write the pool above, you request a virtual machine which has windows latest to spin up your code and run it to check so everything works. It will then uninstall everything. 
+An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So when you write the pool above, you request a virtual machine which has windows latest to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, it will simply reset itself.
 
 ## Variables:
 
@@ -48,6 +51,8 @@ An agent is a virtual machine that runs the pipeline steps. So when you write th
 variables:
   buildConfiguration: 'Release'
 ```
+
+The variable section is just as in normal code. You pre-set key value pairs so that you can use them later on in the yaml. For example the buildConfiguration above gets used in alot of the scripts below. 
 
 ## Stages:
 
@@ -150,11 +155,13 @@ stages:
 ## Scripts:
 
 ```yaml
-
-
+- script: dotnet publish CarSimulatorApp.sln --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+      displayName: 'Publish web app to staging directory'
 ```
 
-You can run CLI commands in your pipeline. Like if you need to install packages. 
+Scripts is a way to get the virtual machine to do things. In the script you can add CLI commands while using the variables that you set at the top.
+
+The displayname is what is shown on the UI when the pipeline is being run.
 
 ## How to require a pr for a branch:
 
