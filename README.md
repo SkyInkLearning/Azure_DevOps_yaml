@@ -19,7 +19,7 @@ trigger:
       - main
 ```
 
-The pipeline will run everytime you merge anything into the chosen trigger branches which will build the program and run the tests.
+The pipeline will run everytime you merge anything into the chosen trigger branches.
 
 
 ## PR:
@@ -32,7 +32,7 @@ pr:
       - main
 ```
 
-The "pr" section is telling the pipeline that if a pr is targets either of these branches, run the pipeline. 
+The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. 
 
 ## Pool:
 
@@ -43,7 +43,7 @@ pool:
 
 This is an agent pool which picks a Microsoft-hosted windows agent. 
 
-An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So when you write the pool above, you request a virtual machine which has windows latest to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, it will simply reset itself.
+An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So in the pool above you request a virtual machine which has windows latest things on it to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, the virtual machine will reset itself.
 
 ## Variables:
 
@@ -59,6 +59,8 @@ The variable section is just as in normal code. You pre-set key value pairs so t
 ```yaml
 stages:
 ```
+
+It's just the different stages that the virtual machine will go through. 
 
 ### Build:
 
@@ -82,6 +84,8 @@ stages:
       displayName: 'Build solution in Release mode'
 ```
 
+The build stage is going to install any nuget packages that are in the solution and run a build of the code.
+
 ### Test:
 
 ```yaml
@@ -101,6 +105,10 @@ stages:
     - script: dotnet test CarSimulatorApp.sln --configuration $(buildConfiguration) --no-build --verbosity normal
       displayName: 'Run all unit tests'
 ```
+
+This is the testing stage which has a dependency on the build stage. If the build stage fails, it wont continue into this stage. 
+
+It uses a script with a CLI command to run all of the tests that are found in the solutions code. 
 
 ### Publish:
 
@@ -122,6 +130,10 @@ stages:
       displayName: 'Upload pipeline artifact'
 ```
 
+The publish stage depends on the success of the test stage. 
+
+It will create an zip file. an artifact, of the code at that stage which will be used later for deploying the code to the website/app. It can also be used to easily be able to go back to an older version if something goes wrong in the future.
+
 ### Deploy:
 
 ```yaml
@@ -132,7 +144,7 @@ stages:
   jobs:
   - deployment: DeployWeb
     displayName: 'Deploy to Azure Web App (Dev)'
-    environment: 'Dev'   # Track deployments/approvals; create an Environment named "Dev"
+    environment: 'Dev'
     strategy:
       runOnce:
         deploy:
@@ -152,6 +164,11 @@ stages:
             displayName: 'Deploy app to Azure App Service'
 ```
 
+The deploy stage depends on the publishing stage. 
+
+It will download the artifact zip file, un-zip it, and deploy the code to the site.
+
+
 ## Scripts:
 
 ```yaml
@@ -168,4 +185,4 @@ The displayname is what is shown on the UI when the pipeline is being run.
 To force pull requests on certain branches you have to set up branch policies. 
 In the repository section, click branches and then go to the specific branches policies and change the following;
 
-Require a minimum number of reviewers, a linked work item, comment resolution. Add a build validation, which requires the PRs to pass the pipeline before merging, and block direct pushes to the branch. 
+Require a minimum number of reviewers, a linked work item, comment resolution. Add a build validation, which requires the PRs to pass the pipeline before merging, and block direct pushes to the branch. You will need a pipeline to be able to set the build to be validated.
