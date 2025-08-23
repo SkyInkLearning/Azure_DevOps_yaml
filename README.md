@@ -155,3 +155,6 @@ You can run CLI commands in your pipeline. Like if you need to install packages.
 ## How to require a pr for a branch:
 
 To force pull requests on certain branches you have to set up branch policies. 
+In the repository section, click branches and then go to the specific branches policies and change the following;
+
+Require a minimum number of reviewers, a linked work item, comment resolution. Add a build validation, which requires the PRs to pass the pipeline before merging, and block direct pushes to the branch. 
