@@ -32,7 +32,7 @@ pr:
       - main
 ```
 
-The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. 
+The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. It will run the pipeline on the code in the pull request, making sure that the tests clear on all the new code in the pull request.
 
 ### Pool:
 
@@ -44,6 +44,8 @@ pool:
 This is an agent pool which picks a Microsoft-hosted windows agent. 
 
 An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So in the pool above you request a virtual machine which has windows latest things on it to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, the virtual machine will reset itself.
+
+You can also utilize a self hosted agent. 
 
 ### Variables:
 
@@ -132,7 +134,9 @@ It uses a script with a CLI command to run all of the tests that are found in th
 
 The publish stage depends on the success of the test stage. 
 
-It will create an zip file. an artifact, of the code at that stage which will be used later for deploying the code to the website/app. It can also be used to easily be able to go back to an older version if something goes wrong in the future.
+Artifacts, that are created in this stage, are the outputs from the build. It can be binaries, configs, a published app or for example a zip file.
+
+In the case of the above pipeline it will create a zip file, an artifact, of the code at that stage which will saved for later and used for deploying the code to the website/app. It can also be used to easily be able to go back to an older version if something goes wrong in the future as the artifacts created are saved in azure devops. 
 
 ### Deploy:
 
@@ -166,7 +170,7 @@ It will create an zip file. an artifact, of the code at that stage which will be
 
 The deploy stage depends on the publishing stage. 
 
-It will download the artifact zip file, un-zip it, and deploy the code to the site.
+It will push the artifact to replace the current version that is on the site. 
 
 
 ### Scripts:
