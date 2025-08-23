@@ -38,6 +38,10 @@ pool:
   vmImage: 'windows-latest'
 ```
 
+This is an agent pool which picks a Microsoft-hosted windows agent. 
+
+An agent is a virtual machine that runs the pipeline steps. So when you write the pool above, you request a virtual machine which has windows latest to spin up your code and run it to check so everything works. It will then uninstall everything. 
+
 ## Variables:
 
 ```yaml
