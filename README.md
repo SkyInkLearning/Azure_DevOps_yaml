@@ -1,6 +1,6 @@
 # Purpose:
 
-This is simply the yaml code that I recently used for one of my courses. Here I will go through each section and explain what they do.
+This is simply the yaml code that I recently used for one of my courses. Here I will go through each section and explain what they do. What is shown might not be the exact version of the code that I had at the end.
 
 
 ## Best explanation:
