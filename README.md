@@ -16,7 +16,7 @@ trigger:
   branches:
     include:
       - develop
-      - main
+      - master
 ```
 
 The pipeline will run everytime you merge anything into the chosen trigger branches.
@@ -29,7 +29,7 @@ pr:
   branches:
     include:
       - develop
-      - main
+      - master
 ```
 
 The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. It will run the pipeline on the code in the pull request, making sure that the tests clear on all the new code in the pull request.
@@ -51,7 +51,9 @@ You can also utilize a self hosted agent.
 
 ```yaml
 variables:
-  buildConfiguration: 'Release'
+  buildConfiguration: Release
+  solution: CarSimulatorApp.sln
+  webProject: CarSimulator.Server/CarSimulator.Server.csproj
 ```
 
 The variable section is just as in normal code. You pre-set key value pairs so that you can use them later on in the yaml. For example the buildConfiguration above gets used in alot of the scripts below. 
@@ -67,23 +69,30 @@ It's just the different stages that the virtual machine will go through.
 ### Build:
 
 ```yaml
-- stage: Build
-  displayName: 'Build Stage'
-  jobs:
-  - job: BuildJob
-    displayName: 'Build CarSimulatorApp solution'
-    steps:
-    - task: UseDotNet@2
-      inputs:
-        packageType: 'sdk'
-        version: '6.0.x'
-      displayName: 'Install .NET 6 SDK'
+  - stage: Build
+    displayName: 'Build Stage'
+    jobs:
+      - job: BuildJob
+        displayName: 'Building car simulator app solution.'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 6.0.x
+            displayName: 'Install .NET 6 SDK'
 
-    - script: dotnet restore CarSimulatorApp.sln
-      displayName: 'Restore NuGet packages'
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 9.0.x
+            displayName: 'Install .NET 9 SDK'
 
-    - script: dotnet build CarSimulatorApp.sln --configuration $(buildConfiguration)
-      displayName: 'Build solution in Release mode'
+          - script: dotnet restore $(solution)
+            displayName: 'Restoring NuGet packages.'
+          
+          - script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
+            displayName: 'Building solution in Release mode.'
+
 ```
 
 The build stage is going to install any nuget packages that are in the solution and run a build of the code.
@@ -91,21 +100,28 @@ The build stage is going to install any nuget packages that are in the solution 
 ### Test:
 
 ```yaml
-- stage: Test
-  displayName: 'Test Stage'
-  dependsOn: Build
-  jobs:
-  - job: TestJob
-    displayName: 'Run Unit Tests'
-    steps:
-    - task: UseDotNet@2
-      inputs:
-        packageType: 'sdk'
-        version: '6.0.x'
-      displayName: 'Install .NET 6 SDK'
+  - stage: Test
+    displayName: 'Testing Stage'
+    dependsOn: Build
+    jobs:
+      - job: TestJob
+        displayName: 'Running tests.'
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 6.0.x
+            displayName: 'Install .NET 6 SDK'
 
-    - script: dotnet test CarSimulatorApp.sln --configuration $(buildConfiguration) --no-build --verbosity normal
-      displayName: 'Run all unit tests'
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 9.0.x
+            displayName: 'Install .NET 9 SDK'
+
+          - script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build --verbosity normal
+            displayName: 'Running all tests.'
+
 ```
 
 This is the testing stage which has a dependency on the build stage. If the build stage fails, it wont continue into this stage. 
@@ -115,21 +131,31 @@ It uses a script with a CLI command to run all of the tests that are found in th
 ### Publish:
 
 ```yaml
-- stage: Publish
-  displayName: 'Publish Stage'
-  dependsOn: Test
-  jobs:
-  - job: PublishJob
-    displayName: 'Publish Artifacts'
-    steps:
-    - script: dotnet publish CarSimulatorApp.sln --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
-      displayName: 'Publish web app to staging directory'
+  - stage: Publish
+    displayName: 'Publishing Stage'
+    dependsOn: Test
+    jobs:
+      - job: PublishJob
+        displayName: 'Publishing artifacts.'
+        steps:
+          - script: dotnet publish $(webProject) --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish_output
+            displayName: 'Publishing web app to staging directory.'
 
-    - task: PublishPipelineArtifact@1
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)'
-        artifact: 'drop'
-      displayName: 'Upload pipeline artifact'
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish_output'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/car-sim.zip'
+              replaceExistingArchive: true
+            displayName: 'Create deployment zip'
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/car-sim.zip'
+              artifact: 'drop'
+            displayName: 'Uploading pipeline artifact.'
+
 ```
 
 The publish stage depends on the success of the test stage. 
@@ -141,36 +167,36 @@ In the case of the above pipeline it will create a zip file, an artifact, of the
 ### Deploy:
 
 ```yaml
-- stage: Deploy
-  displayName: 'Deploy Stage'
-  dependsOn: Publish
-  condition: succeeded()
-  jobs:
-  - deployment: DeployWeb
-    displayName: 'Deploy to Azure Web App (Dev)'
-    environment: 'Dev'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'current'
-              artifactName: 'drop'
-              targetPath: '$(Pipeline.Workspace)/drop'
-            displayName: 'Download build artifact (app.zip)'
+  - stage: Deploy
+    displayName: 'Deploying Stage'
+    dependsOn: Publish
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))   # 👈 only deploy on master
+    jobs:
+      - deployment: DeployJob
+        environment: 'Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifact: 'drop'
+                    path: '$(Pipeline.Workspace)/drop'
+                  displayName: 'Download published artifact'
 
-          - task: AzureWebApp@1
-            inputs:
-              azureSubscription: '<your-service-connection>'
-              appName: '<your-app-service-name>'
-              package: '$(Pipeline.Workspace)/drop/app.zip'
-            displayName: 'Deploy app to Azure App Service'
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: 'DevOpsWebsite'
+                    appName: 'carsim'
+                    appType: 'webApp'
+                    package: '$(Pipeline.Workspace)/drop/car-sim.zip'
+                  displayName: 'Deploying car simulator to web app.'
+
 ```
 
 The deploy stage depends on the publishing stage. 
 
-It will push the artifact to replace the current version that is on the site. 
+It will push the artifact to replace the current version that is on the site. The condition in the yaml makes sure that the pipeline only deploys the code to the website if you merge into master otherwise it will skip this step. 
 
 
 ### Scripts:
