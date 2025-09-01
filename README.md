@@ -1,13 +1,13 @@
 # Purpose:
 
-This is simply the yaml code that I recently used for one of my courses. Here I will go through each section and explain what they do. What is shown might not be the exact version of the code that I had at the end.
+This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version of the code that I had at the end.
 
 
 ## Best explanation:
 
-I think my best way of explaning the yaml pipeline is that you are explaining to a virtual machine what to install and run and what you want to trigger the VM to do it. 
+I think my best way of explaning a yaml pipeline is that you are explaining to a virtual machine what to install and run and what things you want to trigger the VM to do it. 
 
-So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass. 
+So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass before packaging it up for source control and deployment.
 
 ### Triggers:
 
