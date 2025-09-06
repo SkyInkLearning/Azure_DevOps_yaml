@@ -1,11 +1,11 @@
 # Purpose:
 
-This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version of the code that I had at the end.
+This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
 
 
 ## Best explanation:
 
-I think my best way of explaning a yaml pipeline is that you are explaining to a virtual machine what to install and run and what things you want to trigger the VM to do it. 
+I think my best way of explaning a yaml pipeline is that you are explaining to a virtual machine what to do. 
 
 So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass before packaging it up for source control and deployment.
 
@@ -17,14 +17,7 @@ trigger:
     include:
       - develop
       - master
-```
 
-The pipeline will run everytime you merge anything into the chosen trigger branches.
-
-
-### PR:
-
-```yaml
 pr:
   branches:
     include:
@@ -32,7 +25,9 @@ pr:
       - master
 ```
 
-The "pr" section is telling the pipeline that if a pull request is targets either of these branches, run the pipeline. It will run the pipeline on the code in the pull request, making sure that the tests clear on all the new code in the pull request.
+Both the trigger and pr are telling the pipeline to run when a merge/pr is done to either of those two branches. So when finishing a feature you create a pull request to add it to the dve branch which triggers the pipeline to run. After the pr run, it will run again on the feature getting merged into the dev branch. Same thing for the master/main branch. So in total, adding a feature will make the pipeline run four times.
+
+<img src="https://github.com/user-attachments/assets/2c737f5d-b14a-4514-aa0c-7f18d4c10a57" height="400">
 
 ### Pool:
 
@@ -64,7 +59,9 @@ The variable section is just as in normal code. You pre-set key value pairs so t
 stages:
 ```
 
-It's just the different stages that the virtual machine will go through. 
+Stages is where you split things into different stages to enable you to see where things might have gone wrong and to be able to rerun specific stages if it fails. 
+
+<img src="https://github.com/user-attachments/assets/03d1dace-5720-497a-9513-5a47148685bb" height="400">
 
 ### Build:
 
