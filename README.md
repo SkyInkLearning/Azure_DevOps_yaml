@@ -116,14 +116,23 @@ The build stage compiles the code and makes sure that the code runs without erro
               version: 9.0.x
             displayName: 'Install .NET 9 SDK'
 
-          - script: dotnet test $(solution) --configuration $(buildConfiguration) --no-build --verbosity normal
+          - script: dotnet test Car_Simulator_Tests/Car_Simulator_Tests.csproj --configuration $(buildConfiguration) --verbosity normal --logger trx
             displayName: 'Running all tests.'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '**/*.trx'
+            condition: always()
 
 ```
 
 This is the testing stage which has a dependency on the build stage. If the build stage fails, it wont continue into this stage. 
 
-It uses a script with a CLI command to run all of the tests that are found in the solutions code. 
+When using chatgpt to create this pipeline, it told me to add "--no-build" to the script. It seems like that is completely retarded. It made it so that none of my tests were actually running even though the pipeline would actually show green checkmarks on the stages. I removed that and added the publish test results part after having a chat with Claude instead. You also have to add the "--logger trx" part to the test script for the test results to be published. 
+
+It uses a script with a CLI command to run all of the tests that are found in the solutions code.
+
 
 ### Publish:
 
