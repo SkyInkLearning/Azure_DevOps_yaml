@@ -92,7 +92,7 @@ Stages is where you split things into different stages to enable you to see wher
 
 ```
 
-The build stage is going to install any nuget packages that are in the solution and run a build of the code.
+The build stage compiles the code and makes sure that the code runs without errors. It also resolves any project references and nuGet dependencies to make sure they are all available. If any errors appear this stage of the pipeline will fail and the rest of it wont run. 
 
 ### Test:
 
