@@ -25,7 +25,11 @@ pr:
       - master
 ```
 
-Both the trigger and pr are telling the pipeline to run when a merge/pr is done to either of those two branches. So when finishing a feature you create a pull request to add it to the dve branch which triggers the pipeline to run. After the pr run, it will run again on the feature getting merged into the dev branch. Same thing for the master/main branch. So in total, adding a feature will make the pipeline run four times.
+Both the trigger and pr are telling the pipeline to run when a merge/pr is done to either of those two branches. So when finishing a feature you create a pull request to add it to the dev branch which triggers the pipeline to run. After the pr has ran, it will run again on the feature getting merged into the dev branch. 
+
+The same thing happens for the master/main branch, which makes the total pipeline runs four, just to merge get a new feature to the website.
+
+In the case of the pipeline shown below the deploy stage only happens on the merge to the master branch. 
 
 <img src="https://github.com/user-attachments/assets/2c737f5d-b14a-4514-aa0c-7f18d4c10a57" height="400">
 
@@ -36,11 +40,11 @@ pool:
   vmImage: 'windows-latest'
 ```
 
-This is an agent pool which picks a Microsoft-hosted windows agent. 
+This is an agent pool in which we are picking a Microsoft-hosted windows agent. There are linux and mac agents as well.
 
 An agent is a virtual machine, which has common tools pre-installed, that runs the pipeline steps. So in the pool above you request a virtual machine which has windows latest things on it to spin up your code and run through the steps, like the tests, to check so everything works. After it's done, the virtual machine will reset itself.
 
-You can also utilize a self hosted agent. 
+You could also utilize a self hosted agent. 
 
 ### Variables:
 
@@ -168,7 +172,7 @@ The publish stage depends on the success of the test stage.
 
 Artifacts, that are created in this stage, are the outputs from the build. It can be binaries, configs, a published app or for example a zip file.
 
-In the case of the above pipeline it will create a zip file, an artifact, of the code at that stage which will saved for later and used for deploying the code to the website/app. It can also be used to easily be able to go back to an older version if something goes wrong in the future as the artifacts created are saved in azure devops. 
+In the case of the above pipeline it will create a zip file, an artifact, of the code at that stage which will saved for later and used for deploying the code to the website/app. It can also be used to be able to go back to an older version if something goes wrong in the future as the artifacts created are saved in azure devops. 
 
 ### Deploy:
 
@@ -222,3 +226,4 @@ To force pull requests on certain branches you have to set up branch policies.
 In the repository section, click branches and then go to the specific branches policies and change the following;
 
 Require a minimum number of reviewers, a linked work item, comment resolution. Add a build validation, which requires the PRs to pass the pipeline before merging, and block direct pushes to the branch. You will need a pipeline to be able to set the build to be validated.
+
