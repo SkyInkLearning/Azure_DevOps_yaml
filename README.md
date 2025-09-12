@@ -62,7 +62,7 @@ The variable section is just as in normal code. You pre-set key value pairs so t
 stages:
 ```
 
-Stages is where you split things into different stages to enable you to see where things might have gone wrong and to be able to rerun specific stages if it fails. 
+Stages is where you split things into different stages to enable you to see where things might have gone wrong and to be able to re-run specific stages if any of them fail. 
 
 <img src="https://github.com/user-attachments/assets/03d1dace-5720-497a-9513-5a47148685bb" height="400">
 
@@ -120,9 +120,11 @@ The build stage compiles the code and makes sure that the code runs without erro
 
 This is the testing stage which has a dependency on the build stage. If the build stage fails, it wont continue into this stage. 
 
-When using chatgpt to create this pipeline, it told me to add "--no-build" to the script. It seems like that is completely retarded. It seems like gpt was assuming that the testing stage was going to use the build from the build stage and that it didn't work. It made it so that none of my tests were actually running even though the pipeline would actually show green checkmarks on the stages. I removed that and added the publish test results part after having a chat with Claude instead. You also have to add the "--logger trx" part to the test script for the test results to be published.
+When using chatgpt to create this pipeline, it told me to add "--no-build" to the script. It seems like gpt was assuming that the testing stage was going to use the build from the build stage and that it didn't work. Im thinking that it might have worked if the build and test stages were combined into one, but I never tested this as the assignment require them to be separate.
 
-The test stage uses a script with a CLI command to run all of the tests that are found in the specified project.
+It made it so that none of my tests were actually running even though the pipeline would actually show green checkmarks on the stages. When I noticed the problem I removed that and added the publish test results part after having a chat with Claude instead. You also have to add the "--logger trx" part to the test script for the test results to be published to the pipeline.
+
+The test stage uses a script with a CLI command to run all of the tests that are found in the specified project and it should, now that the tests are actually running, cancel on test failure. 
 
 
 ### Publish:
@@ -167,7 +169,13 @@ The publish stage depends on the success of the test stage.
 
 Artifacts, that are created in this stage, are the outputs from the build. It can be binaries, configs, a published app or for example a zip file.
 
-In the case of the above pipeline it will create a zip file, an artifact, of the code at that stage which will saved for later and used for deploying the code to the website/app. It can also be used to be able to go back to an older version if something goes wrong in the future as the artifacts created are saved in azure devops. 
+In the case of the above pipeline it will create a zip file, an artifact, of the code at that stage which will saved for later and used for deploying the code to the website/app. It can also be used to be able to go back to an older version if something goes wrong in the future as the artifacts created are saved. 
+
+<img src="https://github.com/user-attachments/assets/03d1dace-5720-497a-9513-5a47148685bb" height="400">
+
+<img src="https://github.com/user-attachments/assets/6b3643ad-d160-42df-81b2-3b3ff196a1df" height="400">
+
+If you click the artifact shown in the image above, you can access the artifact and download it if needed. 
 
 ### Deploy:
 
@@ -200,8 +208,9 @@ In the case of the above pipeline it will create a zip file, an artifact, of the
 
 The deploy stage depends on the publishing stage. 
 
-It will push the artifact to replace the current version that is on the site. The condition in the yaml makes sure that the pipeline only deploys the code to the website if you merge into master otherwise it will skip this step. 
+It will use the artifact to replace the current version that is on the site. The condition in the yaml makes sure that the pipeline only deploys the code to the website when the code gets merged into master otherwise it will skip this step as seen in the image below.
 
+<img src="https://github.com/user-attachments/assets/2c737f5d-b14a-4514-aa0c-7f18d4c10a57" height="400">
 
 ### Scripts:
 
@@ -210,7 +219,7 @@ It will push the artifact to replace the current version that is on the site. Th
       displayName: 'Publish web app to staging directory'
 ```
 
-Scripts is a way to get the virtual machine to do things. In the script you can add CLI commands while using the variables that you set at the top.
+Scripts is what you use to force the virtual machine to do the things you need done. In the script you can add CLI commands while using the variables that you set at the top.
 
 The displayname is what is shown on the UI when the pipeline is being run.
 
