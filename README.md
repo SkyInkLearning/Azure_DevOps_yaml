@@ -1,12 +1,16 @@
-# Purpose:
+# This Repository:
 
-This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt and claude to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
+This repository is the yaml code from the Dev-Ops course where we were tasked with fixing and testing a car simulator that was built in MVC.  
 
-## Best explanation:
+The car simulator: https://github.com/FrederickWennborg/CarSim_DevOps 
+
+My yaml code below was created with the help of chatgpt and claude, as using AI was allowed, to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
+
+## Explanation of YAML-pipelines:
 
 I think my best way of explaning a yaml pipeline is that you are explaining to a virtual machine what to do. 
 
-So you define which packages are needed and define key value pairs, under variables, and use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass before packaging it up for source control and deployment.
+So you might define which packages are needed and assign key value pairs, under variables, to be able to use scripts to tell the VM which CLI commands to run to properly check that your code and tests pass before packaging it up for source control and deployment.
 
 ### Triggers:
 
