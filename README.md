@@ -1,7 +1,6 @@
 # Purpose:
 
-This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
-
+This is the yaml code that I am using in the DevOps course. It was created with the help of chatgpt and claude to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
 
 ## Best explanation:
 
@@ -79,12 +78,6 @@ Stages is where you split things into different stages to enable you to see wher
           - task: UseDotNet@2
             inputs:
               packageType: sdk
-              version: 6.0.x
-            displayName: 'Install .NET 6 SDK'
-
-          - task: UseDotNet@2
-            inputs:
-              packageType: sdk
               version: 9.0.x
             displayName: 'Install .NET 9 SDK'
 
@@ -93,7 +86,6 @@ Stages is where you split things into different stages to enable you to see wher
           
           - script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
             displayName: 'Building solution in Release mode.'
-
 ```
 
 The build stage compiles the code and makes sure that the code runs without errors. It also resolves any project references and nuGet dependencies to make sure they are all available. If any errors appear this stage of the pipeline will fail and the rest of it wont run. 
@@ -111,24 +103,19 @@ The build stage compiles the code and makes sure that the code runs without erro
           - task: UseDotNet@2
             inputs:
               packageType: sdk
-              version: 6.0.x
-            displayName: 'Install .NET 6 SDK'
-
-          - task: UseDotNet@2
-            inputs:
-              packageType: sdk
               version: 9.0.x
             displayName: 'Install .NET 9 SDK'
+            
+          - script: dotnet restore $(solution)
+            displayName: 'Restoring NuGet packages.' 
 
           - script: dotnet test Car_Simulator_Tests/Car_Simulator_Tests.csproj --configuration $(buildConfiguration) --verbosity normal --logger trx
             displayName: 'Running all tests.'
-
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'VSTest'
               testResultsFiles: '**/*.trx'
             condition: always()
-
 ```
 
 This is the testing stage which has a dependency on the build stage. If the build stage fails, it wont continue into this stage. 
@@ -148,6 +135,15 @@ The test stage uses a script with a CLI command to run all of the tests that are
       - job: PublishJob
         displayName: 'Publishing artifacts.'
         steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: 9.0.x
+            displayName: 'Install .NET 9 SDK'
+
+          - script: dotnet restore $(webProject)
+            displayName: 'Restoring NuGet Packages for web project.'
+
           - script: dotnet publish $(webProject) --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish_output
             displayName: 'Publishing web app to staging directory.'
 
@@ -156,16 +152,15 @@ The test stage uses a script with a CLI command to run all of the tests that are
               rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish_output'
               includeRootFolder: false
               archiveType: 'zip'
-              archiveFile: '$(Build.ArtifactStagingDirectory)/car-sim.zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/car-sim-$(Build.BuildNumber).zip'
               replaceExistingArchive: true
             displayName: 'Create deployment zip'
-
+            
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/car-sim.zip'
+              targetPath: '$(Build.ArtifactStagingDirectory)/car-sim-$(Build.BuildNumber).zip'
               artifact: 'drop'
             displayName: 'Uploading pipeline artifact.'
-
 ```
 
 The publish stage depends on the success of the test stage. 
@@ -180,7 +175,7 @@ In the case of the above pipeline it will create a zip file, an artifact, of the
   - stage: Deploy
     displayName: 'Deploying Stage'
     dependsOn: Publish
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))   # 👈 only deploy on master
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     jobs:
       - deployment: DeployJob
         environment: 'Production'
@@ -199,9 +194,8 @@ In the case of the above pipeline it will create a zip file, an artifact, of the
                     azureSubscription: 'DevOpsWebsite'
                     appName: 'carsim'
                     appType: 'webApp'
-                    package: '$(Pipeline.Workspace)/drop/car-sim.zip'
+                    package: '$(Pipeline.Workspace)/drop/car-sim-$(Build.BuildNumber).zip'
                   displayName: 'Deploying car simulator to web app.'
-
 ```
 
 The deploy stage depends on the publishing stage. 
