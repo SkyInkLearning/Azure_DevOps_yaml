@@ -2,7 +2,13 @@
 
 This repository is the yaml code from the Dev-Ops course where we were tasked with fixing and testing a car simulator that was built in MVC.  
 
-The car simulator: https://github.com/FrederickWennborg/CarSim_DevOps 
+The finished project:
+
+https://github.com/SkyInkLearning/Azure_DevOps_CarSimulatorApp
+
+The starting repo: 
+
+https://github.com/FrederickWennborg/CarSim_DevOps 
 
 My yaml code below was created with the help of chatgpt and claude, as using AI was allowed, to get me started on the project. After having gone through and learned about what each section does, I have made this summary to be able to refer back to it in the future. What is shown might not be the exact version I had at the end.
 
